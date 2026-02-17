@@ -1,193 +1,256 @@
-# Homebrew Setup Quickstart
+# 5-Minute Quickstart
 
-Quick commands to get your Homebrew tap up and running.
+Get started with cryptographically signed Git commits using KERI-based decentralized identity.
 
-## Prerequisites
+## What You'll Learn
 
-- [ ] Ensure `auths --version` works locally
-- [ ] Ensure you have commit/push access to `bordumb/auths`
-- [ ] Ensure you can create a new GitHub repository
+- Install auths CLI
+- Create your cryptographic identity
+- Auto-sign Git commits
+- Verify commits in GitHub Actions
 
-## Step 1: Create Tap Repository (5 minutes)
+**Time**: ~5 minutes
 
-```sh
-# On GitHub, create a new public repository: homebrew-auths
-# Then locally:
-cd ~/workspace/repositories  # or wherever you keep repos
-git clone git@github.com:bordumb/homebrew-auths-cli.git
-cd homebrew-auths-cli
-mkdir Formula
-echo "# Homebrew Tap for Auths" > README.md
-git add .
-git commit -m "Initial commit"
-git push origin main
+---
+
+## Step 1: Install Auths (30 seconds)
+
+### macOS / Linux
+
+```bash
+brew tap bordumb/auths-cli
+brew install auths
 ```
 
-## Step 2: Create a Test Release (2 minutes)
+### From Source
 
-```sh
-cd /Users/bordumb/workspace/repositories/auths-base/auths
-
-# Make sure everything is committed
-git status
-
-# Create and push a tag
-git tag -a v0.0.1-rc.6 -m "Release v0.0.1-rc.6"
-git push origin v0.0.1-rc.6
-
-# Monitor the release workflow
-# Go to: https://github.com/bordumb/auths/actions
-# Wait for it to complete (~5-10 minutes)
+```bash
+cargo install --git https://github.com/bordumb/auths.git auths_cli
 ```
 
-## Step 3: Update and Test Formula (5 minutes)
+Verify installation:
 
-```sh
-cd /Users/bordumb/workspace/repositories/auths-base/auths/homebrew
-
-# Update the formula with checksums from the release
-./update-formula.sh 0.0.1-rc.6
-
-# Review the changes
-cat auths.rb
-
-# Copy to tap repository
-cp auths.rb ~/workspace/repositories/homebrew-auths/Formula/
-
-# Test the formula
-cd ~/workspace/repositories/homebrew-auths
-brew audit --strict --online Formula/auths.rb
-```
-
-## Step 4: Test Installation (3 minutes)
-
-```sh
-cd ~/workspace/repositories/homebrew-auths
-
-# Install from local formula
-brew install --build-from-source ./Formula/auths.rb
-
-# Verify all three binaries work
+```bash
 auths --version
-auths-sign --version
-auths-verify --version
-
-# Run Homebrew tests
-brew test auths
-
-# Clean up
-brew uninstall auths
 ```
 
-## Step 5: Publish (1 minute)
+---
 
-```sh
-cd ~/workspace/repositories/homebrew-auths
+## Step 2: Create Your Identity (60 seconds)
 
-git add Formula/auths.rb README.md
-git commit -m "Add auths v0.0.1-rc.6 formula"
-git push origin main
+Initialize your cryptographic identity:
+
+```bash
+auths init
 ```
 
-## Step 6: Test Public Installation (1 minute)
+This will:
+- Create your `did:keri` identity
+- Generate an Ed25519 keypair
+- Store keys securely in your system keychain
+- Set up the `~/.auths` Git repository
 
-```sh
-# Install from the published tap
-brew install bordumb/auths/auths
+Check your identity:
 
-# Verify it works
-auths --version
-
-# Success! 🎉
+```bash
+auths status
 ```
+
+You'll see output like:
+
+```
+Identity: did:keri:EBf...
+Key Alias: controller
+Devices: 1 linked
+
+Ready to sign commits.
+```
+
+---
+
+## Step 3: Configure Git to Auto-Sign Commits (30 seconds)
+
+Tell Git to use Auths for commit signing:
+
+```bash
+auths git setup
+```
+
+This configures:
+- `gpg.format = ssh`
+- `gpg.ssh.program = auths-sign`
+- `user.signingKey = auths:<your-key-alias>`
+- `commit.gpgsign = true`
+
+All future commits will now be automatically signed!
+
+---
+
+## Step 4: Make a Signed Commit (30 seconds)
+
+```bash
+cd your-project/
+echo "# Test" >> README.md
+git add README.md
+git commit -m "My first signed commit"
+```
+
+Verify the signature:
+
+```bash
+auths verify-commit HEAD
+```
+
+Output:
+
+```
+Commit abc123 is valid
+  Signed by: did:keri:EBf...
+  Device: did:key:z6Mk...
+  Status: VALID
+```
+
+---
+
+## Step 5: Verify Commits in GitHub Actions (2 minutes)
+
+### 5a. Generate Allowed Signers File
+
+Export your public key for GitHub:
+
+```bash
+auths git allowed-signers > .auths/allowed_signers
+```
+
+Commit it to your repo:
+
+```bash
+git add .auths/allowed_signers
+git commit -m "Add allowed signers for commit verification"
+git push
+```
+
+### 5b. Create GitHub Actions Workflow
+
+Create `.github/workflows/verify-commits.yml`:
+
+```yaml
+name: Verify Commits
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: bordumb/auths-verify-action@v1
+        with:
+          allowed-signers: '.auths/allowed_signers'
+```
+
+Commit and push:
+
+```bash
+git add .github/workflows/verify-commits.yml
+git commit -m "Add commit verification workflow"
+git push
+```
+
+### 5c. Watch It Work
+
+Open a pull request or push to `main`. The GitHub Action will:
+- ✅ Verify all commits are signed
+- ✅ Check signatures against allowed signers
+- ✅ Display results in PR checks
+
+---
+
+## What's Next?
+
+### Link Multiple Devices
+
+Work from laptop and desktop? Link them to the same identity:
+
+```bash
+# On your second device
+auths device link --device-did did:key:z6Mk...
+```
+
+### Revoke a Compromised Device
+
+Lost your laptop?
+
+```bash
+auths device revoke --device-did did:key:z6Mk...
+```
+
+### Learn More
+
+- [Auths Documentation](https://github.com/bordumb/auths)
+- [GitHub Action for Verification](https://github.com/marketplace/actions/auths-verify-commits)
+- [Full Setup Guide](./SETUP_GUIDE.md)
+
+---
 
 ## Troubleshooting
 
-### Release workflow failed
-- Check GitHub Actions logs for errors
-- Common issue: Rust toolchain version mismatch
-- Solution: Check `rust-toolchain.toml` and workflow file match
+### "auths: command not found"
 
-### update-formula.sh can't find checksums
-- Verify the release completed successfully
-- Check the release assets exist: https://github.com/bordumb/auths/releases
-- Verify filenames match: `auths-macos-x86_64.tar.gz` and `auths-macos-aarch64.tar.gz`
+Make sure `~/.cargo/bin` is in your PATH:
 
-### brew audit fails
-- Read the error message carefully
-- Common issues:
-  - SHA256 mismatch: Re-run `update-formula.sh`
-  - Invalid URL: Check the version number in URLs
-  - Style issues: Run `brew style --fix Formula/auths.rb`
-
-### Installation fails with "binary not found"
-- Check tar.gz contents:
-  ```sh
-  curl -sL https://github.com/bordumb/auths/releases/download/v0.0.1-rc.6/auths-macos-aarch64.tar.gz | tar -tz
-  ```
-- Should see: `auths`, `auths-sign`, `auths-verify`
-- If not, check the release workflow packaging step
-
-### brew test fails
-- Run manually to see the error:
-  ```sh
-  /opt/homebrew/bin/auths --version
-  ```
-- Verify the version output contains the version number
-
-## Expected Timeline
-
-- **Total time:** ~20 minutes (including waiting for CI)
-- **Active time:** ~10 minutes
-- **CI wait time:** ~10 minutes
-
-## Next Release (Future)
-
-For subsequent releases, it's much faster:
-
-```sh
-# 1. Tag and push (30 seconds)
-git tag -a v0.0.1-rc.7 -m "Release v0.0.1-rc.7"
-git push origin v0.0.1-rc.7
-
-# 2. Wait for CI (~10 minutes)
-
-# 3. Update formula (1 minute)
-cd /Users/bordumb/workspace/repositories/auths-base/auths/homebrew
-./update-formula.sh 0.0.1-rc.7
-cp auths.rb ~/workspace/repositories/homebrew-auths/Formula/
-
-# 4. Test and publish (2 minutes)
-cd ~/workspace/repositories/homebrew-auths
-brew audit --strict Formula/auths.rb
-git add Formula/auths.rb
-git commit -m "Update auths to v0.0.1-rc.7"
-git push origin main
-
-# 5. Verify (30 seconds)
-brew upgrade auths
-auths --version
+```bash
+export PATH="$HOME/.cargo/bin:$PATH"
 ```
 
-## Automation (Optional)
+Or reinstall via Homebrew:
 
-To fully automate formula updates:
-
-```sh
-cd ~/workspace/repositories/homebrew-auths
-mkdir -p .github/workflows
-cp /Users/bordumb/workspace/repositories/auths-base/auths/homebrew/auto-update-workflow.yml \
-   .github/workflows/auto-update.yml
-git add .github/workflows/auto-update.yml
-git commit -m "Add auto-update workflow"
-git push origin main
+```bash
+brew reinstall auths
 ```
 
-Then for each release, just trigger the workflow from the Actions tab!
+### Passphrase Prompts Not Showing
 
-## Help
+`auths-sign` reads from `/dev/tty`. Run Git from an interactive terminal, not from a piped script or some IDEs.
 
-Questions or issues?
-- Check SETUP_GUIDE.md for detailed explanations
-- Check README.md for quick reference
-- Check the Homebrew documentation: https://docs.brew.sh/Formula-Cookbook
+### Commit Not Signed
+
+Check Git configuration:
+
+```bash
+git config --get gpg.format
+# Should output: ssh
+
+git config --get user.signingKey
+# Should output: auths:<your-key-alias>
+```
+
+Re-run setup if needed:
+
+```bash
+auths git setup
+```
+
+---
+
+## Summary
+
+You've learned to:
+
+1. ✅ Install `auths` CLI via Homebrew
+2. ✅ Create a cryptographic identity
+3. ✅ Auto-sign Git commits
+4. ✅ Verify commits in GitHub Actions
+
+**No central server. No blockchain. Just Git and cryptography.**
+
+For deeper dives, see:
+- [Auths Repository](https://github.com/bordumb/auths)
+- [Architecture Documentation](https://github.com/bordumb/auths/blob/main/ARCHITECTURE.md)
+- [GitHub Action](https://github.com/marketplace/actions/auths-verify-commits)

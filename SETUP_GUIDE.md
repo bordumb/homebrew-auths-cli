@@ -5,22 +5,23 @@ This guide will walk you through setting up Homebrew distribution for Auths, fro
 ## Overview
 
 - **Main Repository:** `bordumb/auths` (contains the source code and release workflow)
-- **Tap Repository:** `bordumb/homebrew-auths` (to be created, will contain the formula)
+- **Tap Repository:** `bordumb/homebrew-auths-cli` (already exists at `~~/path/to/homebrew-auths-cli/`)
 - **Formula:** `auths.rb` (defines how to install auths)
 
-## Step 1: Create the Tap Repository
+## Step 1: Initial Setup (Already Done! ✅)
 
-1. Go to GitHub and create a new public repository named `homebrew-auths`
-2. Clone it locally:
-   ```sh
-   git clone https://github.com/bordumb/homebrew-auths.git
-   cd homebrew-auths
-   ```
+The tap repository is already set up:
+- **Local:** `~~/path/to/homebrew-auths-cli/`
+- **Remote:** `git@github.com:bordumb/homebrew-auths-cli.git`
+- **Formula directory:** Already created
 
-3. Create the Formula directory:
-   ```sh
-   mkdir Formula
-   ```
+Just commit the initial files:
+```sh
+cd ~~/path/to/homebrew-auths-cli
+git add .
+git commit -m "Initial Homebrew formula setup"
+git push origin main
+```
 
 ## Step 2: Prepare a Release
 
@@ -28,15 +29,15 @@ Before setting up the formula, we need an actual release with checksums.
 
 1. In the main `auths` repository, create a new release:
    ```sh
-   cd /Users/bordumb/workspace/repositories/auths-base/auths
-   git tag -a v0.0.1-rc.6 -m "Release v0.0.1-rc.6"
-   git push origin v0.0.1-rc.6
+   cd ~/path/to/auths
+   git tag -a v0.0.1-rc.7 -m "Release v0.0.1-rc.7"
+   git push origin v0.0.1-rc.7
    ```
 
 2. Wait for the GitHub Action to complete (check Actions tab on GitHub)
 
 3. Verify the release assets are created:
-   - Go to: https://github.com/bordumb/auths/releases/tag/v0.0.1-rc.6
+   - Go to: https://github.com/bordumb/auths/releases/tag/v0.0.1-rc.7
    - Should see: `auths-macos-x86_64.tar.gz`, `auths-macos-aarch64.tar.gz`, and their `.sha256` files
 
 ## Step 3: Update the Formula
@@ -44,21 +45,21 @@ Before setting up the formula, we need an actual release with checksums.
 1. Get the checksums from the release:
    ```sh
    # From the homebrew directory
-   cd /Users/bordumb/workspace/repositories/auths-base/auths/homebrew
+   cd ~/path/to/auths/homebrew
 
    # Use the update script
-   ./update-formula.sh 0.0.1-rc.6
+   ./update-formula.sh 0.0.1-rc.7
    ```
 
    Or manually:
    ```sh
-   curl -sL https://github.com/bordumb/auths/releases/download/v0.0.1-rc.6/auths-macos-x86_64.tar.gz.sha256
-   curl -sL https://github.com/bordumb/auths/releases/download/v0.0.1-rc.6/auths-macos-aarch64.tar.gz.sha256
+   curl -sL https://github.com/bordumb/auths/releases/download/v0.0.1-rc.7/auths-macos-x86_64.tar.gz.sha256
+   curl -sL https://github.com/bordumb/auths/releases/download/v0.0.1-rc.7/auths-macos-aarch64.tar.gz.sha256
    ```
 
 2. Copy the updated formula to the tap:
    ```sh
-   cp auths.rb /path/to/homebrew-auths/Formula/
+   cp auths.rb ~/path/to/homebrew-auths-cli/Formula/
    ```
 
 ## Step 4: Test the Formula Locally
@@ -66,7 +67,7 @@ Before setting up the formula, we need an actual release with checksums.
 Before publishing, always test:
 
 ```sh
-cd /path/to/homebrew-auths
+cd ~/path/to/homebrew-auths-cli
 
 # Audit the formula
 brew audit --strict --online Formula/auths.rb
@@ -96,15 +97,15 @@ brew uninstall auths
 
 1. Commit and push to the tap repository:
    ```sh
-   cd /path/to/homebrew-auths
+   cd ~/path/to/homebrew-auths-cli
    git add Formula/auths.rb
-   git commit -m "Add auths v0.0.1-rc.6"
+   git commit -m "Add auths v0.0.1-rc.7"
    git push origin main
    ```
 
 2. Test the public installation:
    ```sh
-   brew install bordumb/auths/auths
+   brew install bordumb/auths-cli/auths
    auths --version
    ```
 
@@ -112,9 +113,9 @@ brew uninstall auths
 
 1. Copy the auto-update workflow to the tap repository:
    ```sh
-   cd /path/to/homebrew-auths
+   cd ~/path/to/homebrew-auths-cli
    mkdir -p .github/workflows
-   cp /Users/bordumb/workspace/repositories/auths-base/auths/homebrew/auto-update-workflow.yml \
+   cp ~/path/to/auths/homebrew/auto-update-workflow.yml \
       .github/workflows/auto-update.yml
    git add .github/workflows/auto-update.yml
    git commit -m "Add auto-update workflow"
@@ -133,7 +134,7 @@ brew uninstall auths
 
 1. Create a new release in the main repository:
    ```sh
-   cd /Users/bordumb/workspace/repositories/auths-base/auths
+   cd ~/path/to/auths
    git tag -a v0.0.1-rc.7 -m "Release v0.0.1-rc.7"
    git push origin v0.0.1-rc.7
    ```
@@ -142,14 +143,14 @@ brew uninstall auths
 
 3. Update the formula:
    ```sh
-   cd /Users/bordumb/workspace/repositories/auths-base/auths/homebrew
+   cd ~/path/to/auths/homebrew
    ./update-formula.sh 0.0.1-rc.7
    ```
 
 4. Test locally:
    ```sh
-   cp auths.rb /path/to/homebrew-auths/Formula/
-   cd /path/to/homebrew-auths
+   cp auths.rb ~/path/to/homebrew-auths-cli/Formula/
+   cd ~/path/to/homebrew-auths-cli
    brew audit --strict Formula/auths.rb
    brew install --build-from-source ./Formula/auths.rb
    brew test auths
@@ -171,7 +172,7 @@ Use Homebrew's bump tool:
 brew bump-formula-pr \
   --url="https://github.com/bordumb/auths/releases/download/v0.0.1-rc.7/auths-macos-x86_64.tar.gz" \
   --sha256="<sha256>" \
-  bordumb/auths/auths
+  bordumb/auths-cli/auths
 ```
 
 ### Fully Automated Process
@@ -208,7 +209,7 @@ Before each release:
 ### Installation Failures
 - Verify the tar.gz contains the expected binaries:
   ```sh
-  curl -sL https://github.com/bordumb/auths/releases/download/v0.0.1-rc.6/auths-macos-aarch64.tar.gz | tar -tz
+  curl -sL https://github.com/bordumb/auths/releases/download/v0.0.1-rc.7/auths-macos-aarch64.tar.gz | tar -tz
   ```
 - Should see: `auths`, `auths-sign`, `auths-verify`
 
@@ -230,9 +231,9 @@ auths/
 
 ## Next Steps
 
-1. **Create the tap repository:** `homebrew-auths` on GitHub
-2. **Create a test release:** Tag and push v0.0.1-rc.6
-3. **Update the formula:** Run `./update-formula.sh 0.0.1-rc.6`
+1. **Create the tap repository:** `homebrew-auths-cli` on GitHub
+2. **Create a test release:** Tag and push v0.0.1-rc.7
+3. **Update the formula:** Run `./update-formula.sh 0.0.1-rc.7`
 4. **Test locally:** Follow Step 4 above
 5. **Publish:** Follow Step 5 above
 6. **Announce:** Update README.md with installation instructions
@@ -242,7 +243,7 @@ auths/
 Once published, users can install with:
 
 ```sh
-brew install bordumb/auths/auths
+brew install bordumb/auths-cli/auths
 ```
 
 Or:
