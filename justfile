@@ -18,20 +18,27 @@ update VERSION:
       exit 1
     fi
 
-    # Fetch SHA256 for one artifact (attestation JSON preferred, .sha256 fallback).
+    # Fetch SHA256 for one artifact.
+    # Tries the .sha256 sidecar first; falls back to the auths attestation JSON.
+    # Uses -sL (no -f) so HTTP errors don't kill the script — we validate the
+    # output shape instead (a sha256 is exactly 64 lowercase hex characters).
+    is_sha256() { [[ "$1" =~ ^[0-9a-f]{64}$ ]]; }
+
     get_sha() {
       local artifact="$1"
       local sha
-      sha=$(curl -fsSL "${BASE}/${artifact}.auths.json" 2>/dev/null \
+
+      # Primary: .sha256 sidecar (one line: "<hex>  <filename>")
+      sha=$(curl -sL "${BASE}/${artifact}.sha256" 2>/dev/null | awk '{print $1}' || true)
+      is_sha256 "$sha" && { echo "$sha"; return 0; }
+
+      # Fallback: auths attestation JSON
+      sha=$(curl -sL "${BASE}/${artifact}.auths.json" 2>/dev/null \
             | jq -r '.payload.digest.hex // empty' 2>/dev/null || true)
-      if [ -z "$sha" ]; then
-        sha=$(curl -fsSL "${BASE}/${artifact}.sha256" 2>/dev/null | awk '{print $1}')
-      fi
-      if [ -z "$sha" ] || [ "$sha" = "null" ]; then
-        echo "error: could not fetch checksum for ${artifact}" >&2
-        exit 1
-      fi
-      echo "$sha"
+      is_sha256 "$sha" && { echo "$sha"; return 0; }
+
+      echo "error: could not fetch checksum for ${artifact}" >&2
+      return 1
     }
 
     # Released targets: macOS ARM, Linux x86_64, Linux ARM (no macOS Intel build).
