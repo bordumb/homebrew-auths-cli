@@ -1,24 +1,24 @@
 class Auths < Formula
   desc "Git-native identity and access management with cryptographic commit signing"
   homepage "https://docs.auths.dev"
-  version "0.0.1-rc.9"
+  version "0.0.1-rc.11"
   license "Apache-2.0"
 
   on_macos do
     on_arm do
       url "https://github.com/bordumb/auths-releases/releases/download/v#{version}/auths-macos-aarch64.tar.gz"
-      sha256 "3eb1abf394b008e02b6f4ba576c45c537470bd087d615d10dbc16b7112b34bcb"
+      sha256 "f1bdc4674b43d1502c0040f6b1b2df4f1818622b98c56bde0fad532b34485bfa"
     end
   end
 
   on_linux do
     on_intel do
       url "https://github.com/bordumb/auths-releases/releases/download/v#{version}/auths-linux-x86_64.tar.gz"
-      sha256 "afd3d6be0406ec285a7de1c847ff27f1442389a23de8caa2dd088f5377fc0256"
+      sha256 "5398ecebd6981f146ff53791aa42211866a43a372706593fd18533f709153d93"
     end
     on_arm do
       url "https://github.com/bordumb/auths-releases/releases/download/v#{version}/auths-linux-aarch64.tar.gz"
-      sha256 "1f96526f02d760d8ee384d6ed1c9c4afbc94702203f6ba1b30c206a153bac6cc"
+      sha256 "c199bc049fe187a1d90819195adee97fa00e517586ad9a83d9d59b3287cfc89e"
     end
   end
 
