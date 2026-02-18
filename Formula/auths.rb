@@ -1,7 +1,7 @@
 class Auths < Formula
   desc "Git-native identity and access management with cryptographic commit signing"
   homepage "https://docs.auths.dev"
-  version "0.0.1-rc.7"
+  version "0.0.1-rc.9"
   license "Apache-2.0"
 
   on_macos do

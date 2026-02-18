@@ -35,8 +35,8 @@ From the `auths` repository:
 cd /Users/bordumb/workspace/repositories/auths-base/auths
 
 # Create and push tag
-git tag -a v0.0.1-rc.7 -m "Release candidate 7"
-git push origin v0.0.1-rc.7
+git tag -a v0.0.1-rc.9 -m "Release candidate 7"
+git push origin v0.0.1-rc.9
 ```
 
 This triggers the release workflow which:
@@ -53,7 +53,7 @@ The formula currently has placeholder SHA256s. Update them:
 cd /Users/bordumb/workspace/repositories/auths-base/homebrew-auths-cli
 
 # Run update script (requires jq)
-./update-formula.sh 0.0.1-rc.7
+./update-formula.sh 0.0.1-rc.9
 ```
 
 This script:
@@ -96,7 +96,7 @@ brew untap bordumb/auths-cli
 
 ```bash
 git add Formula/auths.rb
-git commit -m "Initial formula for auths v0.0.1-rc.8"
+git commit -m "Initial formula for auths v0.0.1-rc.9"
 git push origin main
 ```
 
