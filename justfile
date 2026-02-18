@@ -10,7 +10,7 @@ update VERSION:
     set -euo pipefail
 
     VERSION="{{VERSION}}"
-    BASE="https://github.com/bordumb/auths/releases/download/v${VERSION}"
+    BASE="https://github.com/bordumb/auths-releases/releases/download/v${VERSION}"
     FORMULA="Formula/auths.rb"
 
     if [ ! -f "$FORMULA" ]; then
