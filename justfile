@@ -34,12 +34,11 @@ update VERSION:
       echo "$sha"
     }
 
+    # Released targets: macOS ARM, Linux x86_64, Linux ARM (no macOS Intel build).
     echo "Fetching checksums for v${VERSION}..."
-    MAC_X86=$(get_sha "auths-macos-x86_64.tar.gz")
     MAC_ARM=$(get_sha "auths-macos-aarch64.tar.gz")
     LX_X86=$(get_sha  "auths-linux-x86_64.tar.gz")
     LX_ARM=$(get_sha  "auths-linux-aarch64.tar.gz")
-    echo "  macOS x86_64:  $MAC_X86"
     echo "  macOS aarch64: $MAC_ARM"
     echo "  Linux x86_64:  $LX_X86"
     echo "  Linux aarch64: $LX_ARM"
@@ -50,12 +49,10 @@ update VERSION:
     # Patch each sha256 in document order by tracking which url line was seen last.
     # awk is used instead of sed so we can match url context without fragile ranges.
     awk \
-      -v mac_x86="$MAC_X86" \
       -v mac_arm="$MAC_ARM" \
       -v lx_x86="$LX_X86"  \
       -v lx_arm="$LX_ARM"  \
     '
-    /auths-macos-x86_64/  { next_sha = mac_x86 }
     /auths-macos-aarch64/ { next_sha = mac_arm }
     /auths-linux-x86_64/  { next_sha = lx_x86  }
     /auths-linux-aarch64/ { next_sha = lx_arm  }
@@ -70,7 +67,7 @@ update VERSION:
 
 # Audit the formula (same check CI runs).
 audit:
-    brew audit --strict --online Formula/auths.rb
+    brew audit --strict --online bordumb/auths-cli/auths
 
 # Install from local formula, smoke-test, then uninstall.
 test: audit

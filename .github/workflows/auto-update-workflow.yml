@@ -32,6 +32,9 @@ jobs:
             echo "version=${{ github.event.client_payload.version }}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Tap repo locally so brew can find the formula by name
+        run: brew tap bordumb/auths-cli .
+
       - name: Update formula
         run: just update ${{ steps.version.outputs.version }}
 

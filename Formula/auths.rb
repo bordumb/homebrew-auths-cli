@@ -5,20 +5,18 @@ class Auths < Formula
   license "Apache-2.0"
 
   on_macos do
-    if Hardware::CPU.intel?
-      url "https://github.com/bordumb/auths/releases/download/v#{version}/auths-macos-x86_64.tar.gz"
-      sha256 "0000000000000000000000000000000000000000000000000000000000000000"
-    elsif Hardware::CPU.arm?
+    on_arm do
       url "https://github.com/bordumb/auths/releases/download/v#{version}/auths-macos-aarch64.tar.gz"
       sha256 "0000000000000000000000000000000000000000000000000000000000000000"
     end
   end
 
   on_linux do
-    if Hardware::CPU.intel?
+    on_intel do
       url "https://github.com/bordumb/auths/releases/download/v#{version}/auths-linux-x86_64.tar.gz"
       sha256 "0000000000000000000000000000000000000000000000000000000000000000"
-    elsif Hardware::CPU.arm?
+    end
+    on_arm do
       url "https://github.com/bordumb/auths/releases/download/v#{version}/auths-linux-aarch64.tar.gz"
       sha256 "0000000000000000000000000000000000000000000000000000000000000000"
     end
