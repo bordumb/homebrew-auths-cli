@@ -1,24 +1,24 @@
 class Auths < Formula
   desc "Cryptographic identity for developers — sign artifacts, replace API keys"
   homepage "https://auths.dev"
-  version "0.1.8"
+  version "0.1.9"
   license "Apache-2.0"
 
   on_macos do
     on_arm do
       url "https://github.com/auths-dev/auths/releases/download/v#{version}/auths-macos-aarch64.tar.gz"
-      sha256 "1d83df25fb950da515865d43daac6e2bec1be5bb1d6197f553cad02255dc0746"
+      sha256 "289034957a0057a6dd4486cba02f37bf99f1a0d430e43f6edb0e4aceeb9976cc"
     end
   end
 
   on_linux do
     on_intel do
       url "https://github.com/auths-dev/auths/releases/download/v#{version}/auths-linux-x86_64.tar.gz"
-      sha256 "2b09bb2b109d6dc3fef3be27444803d68dadcf4c58e8dcda513444236ae891e3"
+      sha256 "892a1403fac7b20e70846f276dee6040a6b9a4d0c9934ab3060c78ee403f287f"
     end
     on_arm do
       url "https://github.com/auths-dev/auths/releases/download/v#{version}/auths-linux-aarch64.tar.gz"
-      sha256 "15bfa43eef37d7c826c4a6a96f882d59513578f34e54c70ac612e987159d83dc"
+      sha256 "13607f214d141429cc91cfc48a58fc80dbad2863cd3a6b2982360f510b348c62"
     end
   end
 
